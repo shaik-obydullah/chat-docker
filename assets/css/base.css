@@ -108,6 +108,7 @@ a:hover {
 }
 
 .form-group input {
+  width: 100%;
   padding: 12px 14px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
@@ -134,6 +135,7 @@ a:hover {
 
 .form-row .form-group {
   flex: 1;
+  min-width: 0;
 }
 
 .auth-btn {
