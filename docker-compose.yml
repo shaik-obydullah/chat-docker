@@ -1,0 +1,52 @@
+services:
+  chat_server:
+    image: mariadb:10.11
+    container_name: chat_server
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: chat_user
+    ports:
+      - "3309:3306"
+    volumes:
+      - chat_db_data:/var/lib/mysql
+      - ./db_chat.sql:/docker-entrypoint-initdb.d/db_chat.sql
+
+  chat_app:
+    build: .
+    container_name: chat_app
+    restart: unless-stopped
+    depends_on:
+      - chat_server
+    volumes:
+      - .:/var/www/html
+    expose:
+      - 9000
+
+  chat_nginx:
+    image: nginx:stable-alpine
+    container_name: chat_nginx
+    restart: unless-stopped
+    ports:
+      - "8085:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - chat_app
+
+  chat_phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: chat_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8084:80"
+    environment:
+      PMA_HOST: chat_server
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - chat_server
+
+volumes:
+  chat_db_data:
