@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Block access to system directories
+RewriteRule ^(App|System|vendor|storage)($|/) - [F,L]
+
+# Redirect all other requests to Public/
+RewriteCond %{REQUEST_URI} !^/Public/
+RewriteRule ^(.*)$ Public/$1 [L]

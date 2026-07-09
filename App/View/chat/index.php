@@ -184,7 +184,7 @@
       const div = document.createElement('div');
       const isMine = m.sender_id == userId;
       div.className = 'message ' + (isMine ? 'sent' : 'received');
-      const time = m.created_at ? new Date(m.created_at + ' UTC').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const time = m.created_at ? new Date(m.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
       if (m.type === 'voice') {
         div.innerHTML = `<div class="message-content voice"><audio controls src="${m.message}" style="height:36px;max-width:200px"></audio><span class="message-time">${time}</span></div>`;
       } else {
@@ -215,13 +215,17 @@
       if (!currentContact) return;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
+        const types = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/aac'];
+        const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
+        mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        const ext = mimeType.includes('mp4') || mimeType.includes('aac') ? 'm4a' : 'webm';
         audioChunks = [];
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.onstop = () => {
           stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
           const fd = new FormData();
-          fd.append('audio', new Blob(audioChunks, { type: 'audio/webm' }), 'voice.webm');
+          fd.append('audio', blob, 'voice.' + ext);
           fd.append('receiver_id', currentContact.id);
           fetch('/chat/upload-voice', { method: 'POST', body: fd }).then(() => loadMessages());
         };

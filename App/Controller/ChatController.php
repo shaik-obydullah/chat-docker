@@ -145,7 +145,18 @@ class ChatController extends Controller
             $this->json(['error' => 'Upload failed'], 400);
         }
 
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'webm';
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_file($finfo, $file['tmp_name']);
+
+        $extMap = [
+            'audio/webm'  => 'webm',
+            'audio/ogg'   => 'ogg',
+            'audio/mp4'   => 'm4a',
+            'audio/aac'   => 'aac',
+            'audio/mpeg'  => 'mp3',
+            'audio/wav'   => 'wav',
+        ];
+        $ext = $extMap[$mime] ?? pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'webm';
         $name = 'voice_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $dir = BASE_PATH . 'storage/voice/';
 
@@ -255,7 +266,18 @@ class ChatController extends Controller
 
         $decrypted = self::decryptFile($encrypted);
 
-        header('Content-Type: audio/webm');
+        $mimeMap = [
+            'webm' => 'audio/webm',
+            'ogg'  => 'audio/ogg',
+            'm4a'  => 'audio/mp4',
+            'aac'  => 'audio/aac',
+            'mp3'  => 'audio/mpeg',
+            'wav'  => 'audio/wav',
+        ];
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $mime = $mimeMap[$ext] ?? 'audio/webm';
+
+        header('Content-Type: ' . $mime);
         header('Content-Length: ' . strlen($decrypted));
         header('Cache-Control: private, max-age=86400');
         echo $decrypted;
