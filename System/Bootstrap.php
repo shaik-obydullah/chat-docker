@@ -21,6 +21,11 @@ if (file_exists($envFile)) {
     }
 }
 
+$composerAutoload = BASE_PATH . 'vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
 spl_autoload_register(function (string $class) {
     $prefixes = [
         'Lime\\' => SYSTEM_PATH,
@@ -44,6 +49,3 @@ spl_autoload_register(function (string $class) {
 });
 
 Lime\Router::loadRoutes(APP_PATH . 'Router/web.php');
-
-$router = new Lime\Router();
-$router->dispatch();

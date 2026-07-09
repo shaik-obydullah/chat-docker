@@ -235,6 +235,29 @@ body {
   background: #e5e7eb;
 }
 
+.add-contact-btn {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.add-contact-btn:hover {
+  background: #4f46e5;
+}
+
 .contact-list {
   flex: 1;
   overflow-y: auto;

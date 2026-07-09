@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+define('BASE_PATH', __DIR__ . DIRECTORY_SEPARATOR);
+require_once BASE_PATH . 'System/Bootstrap.php';
+
+$command = $argv[1] ?? 'help';
+
+match ($command) {
+    'migrate'       => Lime\Migration::run(),
+    'migrate:reset' => Lime\Migration::reset(),
+    default => exit(implode("\n", [
+        'Lime PHP Framework',
+        '  php lime migrate        Run pending migrations',
+        '  php lime migrate:reset  Reset all migrations',
+        '',
+    ])),
+};

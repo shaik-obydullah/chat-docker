@@ -15,3 +15,6 @@ foreach ($blockedPaths as $path) {
 }
 
 require_once BASE_PATH . 'System/Bootstrap.php';
+
+$router = new Lime\Router();
+$router->dispatch();
