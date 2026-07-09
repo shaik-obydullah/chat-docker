@@ -36,6 +36,9 @@
     <main class="main-panel">
       <div class="chat-header" id="chatHeader">
         <div class="chat-header-left">
+          <button class="back-btn" id="backBtn" title="Back to contacts">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
           <div class="contact-avatar" id="chatAvatar" style="background:#6366f1">S</div>
           <div class="chat-header-info">
             <span class="chat-contact-name" id="chatContactName">Select a contact</span>
@@ -163,6 +166,7 @@
       renderContactList(searchInput.value);
       lastMessageId = 0;
       loadMessages(true);
+      showChat();
     }
 
     function loadMessages(initial) {
@@ -180,13 +184,23 @@
         });
     }
 
+    function formatTime(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr.replace(' ', 'T') + 'Z');
+        return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        return '';
+      }
+    }
+
     function renderMessage(m) {
       const div = document.createElement('div');
       const isMine = m.sender_id == userId;
       div.className = 'message ' + (isMine ? 'sent' : 'received');
-      const time = m.created_at ? new Date(m.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const time = formatTime(m.created_at);
       if (m.type === 'voice') {
-        div.innerHTML = `<div class="message-content voice"><audio controls src="${m.message}" style="height:36px;max-width:200px"></audio><span class="message-time">${time}</span></div>`;
+        div.innerHTML = `<div class="message-content voice"><audio controls style="height:36px;max-width:200px"><source src="${m.message}"></audio><span class="message-time">${time}</span></div>`;
       } else {
         div.innerHTML = `<div class="message-content"><p>${m.message}</p><span class="message-time">${time}</span></div>`;
       }
@@ -215,15 +229,16 @@
       if (!currentContact) return;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const types = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/aac'];
-        const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
-        mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
-        const ext = mimeType.includes('mp4') || mimeType.includes('aac') ? 'm4a' : 'webm';
+        const types = ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/aac', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+        const preferred = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
+        mediaRecorder = new MediaRecorder(stream, preferred ? { mimeType: preferred } : {});
         audioChunks = [];
         mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.onstop = () => {
           stream.getTracks().forEach(t => t.stop());
-          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+          const actual = mediaRecorder.mimeType || preferred || 'audio/webm';
+          const ext = actual.includes('mp4') || actual.includes('aac') ? 'm4a' : actual.includes('ogg') ? 'ogg' : 'webm';
+          const blob = new Blob(audioChunks, { type: actual });
           const fd = new FormData();
           fd.append('audio', blob, 'voice.' + ext);
           fd.append('receiver_id', currentContact.id);
@@ -240,6 +255,22 @@
       if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
       voiceBar.classList.remove('active');
     });
+
+    function isMobile() { return window.innerWidth <= 768; }
+
+    function showSidebar() {
+      document.querySelector('.sidebar').classList.remove('hidden');
+      document.querySelector('.main-panel').classList.remove('active');
+    }
+
+    function showChat() {
+      if (isMobile()) {
+        document.querySelector('.sidebar').classList.add('hidden');
+        document.querySelector('.main-panel').classList.add('active');
+      }
+    }
+
+    document.getElementById('backBtn').addEventListener('click', showSidebar);
 
     setInterval(() => {
       if (currentContact) loadMessages();

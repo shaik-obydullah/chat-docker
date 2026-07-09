@@ -266,16 +266,12 @@ class ChatController extends Controller
 
         $decrypted = self::decryptFile($encrypted);
 
-        $mimeMap = [
-            'webm' => 'audio/webm',
-            'ogg'  => 'audio/ogg',
-            'm4a'  => 'audio/mp4',
-            'aac'  => 'audio/aac',
-            'mp3'  => 'audio/mpeg',
-            'wav'  => 'audio/wav',
-        ];
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
-        $mime = $mimeMap[$ext] ?? 'audio/webm';
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime = finfo_buffer($finfo, $decrypted);
+        $knownAudio = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/mpeg', 'audio/wav'];
+        if (!in_array($mime, $knownAudio, true)) {
+            $mime = 'audio/mp4';
+        }
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . strlen($decrypted));

@@ -640,3 +640,35 @@ body {
   background: #e5e7eb;
   color: #6b7280;
 }
+
+.back-btn {
+  display: none;
+  background: none;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+.back-btn:hover { background: #f3f4f6; }
+
+@media (max-width: 768px) {
+  body.chat-body { align-items: stretch; }
+  .messenger {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+  .sidebar { width: 100%; min-width: 0; }
+  .sidebar.hidden { display: none; }
+  .main-panel { display: none; }
+  .main-panel.active { display: flex; }
+  .back-btn { display: flex; }
+  .message { max-width: 85%; }
+  .messages-container { padding: 12px; }
+}
