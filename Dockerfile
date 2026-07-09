@@ -1,11 +1,11 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.5-fpm-alpine
 
-RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable mysqli pdo pdo_mysql
 
 WORKDIR /var/www/html
 
 COPY . /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html/uploads
+RUN mkdir -p /var/www/html/uploads && chown -R www-data:www-data /var/www/html/uploads
 
 EXPOSE 9000
