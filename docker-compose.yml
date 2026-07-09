@@ -10,7 +10,6 @@ services:
       - "3309:3306"
     volumes:
       - chat_db_data:/var/lib/mysql
-      - ./db_chat.sql:/docker-entrypoint-initdb.d/db_chat.sql
 
   chat_app:
     build: .
